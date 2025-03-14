@@ -6,14 +6,12 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
-	"strings"
 
-	"github.com/cbroglie/mustache"
+	"github.com/dhimasan0206/adapter-cli/internal"
 	"github.com/spf13/cobra"
 )
 
-var moduleName, author, email, out string
+var moduleName, author, email string
 
 // generateCmd represents the generate command
 var generateCmd = &cobra.Command{
@@ -33,41 +31,47 @@ to quickly create a Cobra application.`,
 			"email":      email,
 		}
 
-		templates := "internal/templates"
-		filepath.Walk(templates, func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				return err
-			}
+		err := internal.Generate(data)
+		if err != nil {
+			fmt.Println("Error generating files:", err)
+			os.Exit(1)
+		}
 
-			fmt.Println(out)
-			target := strings.Replace(strings.Replace(path, ".mustache", "", 1), "internal/templates", out, 1)
-			fmt.Println(target)
+		// templates := "internal/templates"
+		// filepath.Walk(templates, func(path string, info os.FileInfo, err error) error {
+		// 	if err != nil {
+		// 		return err
+		// 	}
 
-			if info.IsDir() {
-				fmt.Printf("Directory: %s\n", path)
-				err := os.MkdirAll(target, 0777)
-				if err != nil {
-					fmt.Println("Error creating directory:", err)
-					return err
-				}
-				fmt.Println(target + " directory has been generated successfully.")
-				return nil
-			}
+		// 	fmt.Println(out)
+		// 	target := strings.Replace(strings.Replace(path, ".mustache", "", 1), "internal/templates", out, 1)
+		// 	fmt.Println(target)
 
-			fmt.Printf("File: %s\n", path)
-			result, err := mustache.RenderFile(path, data)
-			if err != nil {
-				fmt.Println("Error rendering template:", err)
-				return err
-			}
-			err = os.WriteFile(target, []byte(result), 0644)
-			if err != nil {
-				fmt.Println("Error writing file:", err)
-				return err
-			}
-			fmt.Println(target + " has been generated successfully.")
-			return nil
-		})
+		// 	if info.IsDir() {
+		// 		fmt.Printf("Directory: %s\n", path)
+		// 		err := os.MkdirAll(target, 0777)
+		// 		if err != nil {
+		// 			fmt.Println("Error creating directory:", err)
+		// 			return err
+		// 		}
+		// 		fmt.Println(target + " directory has been generated successfully.")
+		// 		return nil
+		// 	}
+
+		// 	fmt.Printf("File: %s\n", path)
+		// 	result, err := mustache.RenderFile(path, data)
+		// 	if err != nil {
+		// 		fmt.Println("Error rendering template:", err)
+		// 		return err
+		// 	}
+		// 	err = os.WriteFile(target, []byte(result), 0644)
+		// 	if err != nil {
+		// 		fmt.Println("Error writing file:", err)
+		// 		return err
+		// 	}
+		// 	fmt.Println(target + " has been generated successfully.")
+		// 	return nil
+		// })
 	},
 }
 
@@ -83,8 +87,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// generateCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	generateCmd.Flags().StringVarP(&moduleName, "module", "m", "", "Module name")
-	generateCmd.Flags().StringVarP(&author, "author", "a", "", "Author name")
-	generateCmd.Flags().StringVarP(&author, "email", "e", "", "Author email")
-	generateCmd.Flags().StringVarP(&out, "out", "o", "", "Output directory")
+	generateCmd.Flags().StringVarP(&moduleName, "module", "m", "adapter", "Module name")
+	generateCmd.Flags().StringVarP(&author, "author", "a", "name", "Author name")
+	generateCmd.Flags().StringVarP(&author, "email", "e", "email@example.com", "Author email")
 }
